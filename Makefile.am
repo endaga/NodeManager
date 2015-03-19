@@ -20,8 +20,8 @@
 
 include $(top_srcdir)/Makefile.common
 
-# AM_CPPFLAGS = $(STD_DEFINES_AND_INCLUDES)
-# AM_CXXFLAGS = -Wall -O3
+AM_CPPFLAGS = $(STD_DEFINES_AND_INCLUDES)
+AM_CXXFLAGS = -Wall -O3
 
 noinst_LTLIBRARIES = libnodemanager.la
 
