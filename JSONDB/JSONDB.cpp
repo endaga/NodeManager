@@ -114,6 +114,7 @@ JsonBox::Object JSONDB::read(std::string query, unsigned retries)
 	if (sqlite3_prepare_statement(mDB, &stmt, query.c_str(), retries)) {
 		response["code"] = JsonBox::Value(406);
 		response["data"] = JsonBox::Value("query prep failed");
+		disconnect();
 		return response;
 	}
 
@@ -142,6 +143,7 @@ JsonBox::Object JSONDB::read(std::string query, unsigned retries)
 		} else {
 			response["code"] = JsonBox::Value(406);
 			response["data"] = JsonBox::Value("query run failed");
+			disconnect();
 			return response;
 		}
 		a.push_back(o);
@@ -155,6 +157,7 @@ JsonBox::Object JSONDB::read(std::string query, unsigned retries)
 		response["data"] = a;
 	}
 
+        disconnect();
 	return response;
 }
 
@@ -257,6 +260,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing name");
+				disconnect();
 				return response;
 			}
 			std::string name = jit->second.getString();
@@ -265,6 +269,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing imsi");
+				disconnect();
 				return response;
 			}
 			std::string imsi = jit->second.getString();
@@ -273,6 +278,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing msisdn");
+				disconnect();
 				return response;
 			}
 			std::string msisdn = jit->second.getString();
@@ -281,6 +287,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing ipaddr");
+				disconnect();
 				return response;
 			}
 			std::string ipaddr = jit->second.getString();
@@ -289,6 +296,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing port");
+				disconnect();
 				return response;
 			}
 			std::string port = jit->second.getString();
@@ -297,6 +305,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing ki");
+				disconnect();
 				return response;
 			}
 			std::string ki = jit->second.getString();
@@ -321,6 +330,8 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 				response["data"]["sip_buddies"] = responseSIP;
 				response["data"]["dialdata_table"] = responseDIAL;
 			}
+			disconnect();
+                        return response;
 
 		} else if (action.compare("read") == 0) {
 			q << "select sip_buddies.username as \"imsi\", sip_buddies.name as \"name\", dialdata_table.exten as \"msisdn\" from sip_buddies left outer join dialdata_table on sip_buddies.username = dialdata_table.dial";
@@ -339,6 +350,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == match.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing imsi to match on");
+				disconnect();
 				return response;
 			}
 			std::string imsi = jit->second.getString();
@@ -347,6 +359,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing name to update");
+				disconnect();
 				return response;
 			}
 			std::string name = jit->second.getString();
@@ -355,6 +368,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing msisdn to update");
+				disconnect();
 				return response;
 			}
 			std::string msisdn = jit->second.getString();
@@ -363,6 +377,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing ipaddr");
+				disconnect();
 				return response;
 			}
 			std::string ipaddr = jit->second.getString();
@@ -371,6 +386,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 			if (jit == fields.end()) {
 				response["code"] = JsonBox::Value(406);
 				response["data"] = JsonBox::Value("missing port");
+				disconnect();
 				return response;
 			}
 			std::string port = jit->second.getString();
@@ -393,6 +409,8 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 				response["data"]["sip_buddies"] = responseSIP;
 				response["data"]["dialdata_table"] = responseDIAL;
 			}
+			disconnect();
+                        return response;
 
 		} else if (action.compare("delete") == 0) {
 			JsonBox::Object match = request["match"].getObject();
@@ -424,6 +442,8 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 				response["data"]["sip_buddies"] = responseSIP;
 				response["data"]["dialdata_table"] = responseDIAL;
 			}
+			disconnect();
+                        return response;
 
 		}
 
@@ -439,6 +459,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 		if (fields.size() == 0) {
 			response["code"] = JsonBox::Value(406);
 			response["data"] = JsonBox::Value("missing fields data");
+			disconnect();
 			return response;
 		}
 
@@ -452,7 +473,10 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 		}
 		q << " (" << implode(",", colNames) << ") values (" << "\"" << implode("\",\"", colValues) << "\")";
 
-		return execOnly(q.str());
+		JsonBox::Object createResponse;
+		createResponse = execOnly(q.str());
+		disconnect();
+		return createResponse;
 
 	// READ
 	} else if (action.compare("read") == 0) {
@@ -466,7 +490,10 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 
 		// add match clause
 		q << generateWhereClause(request);
-		return read(q.str());
+
+		JsonBox::Object readResponse;
+		readResponse = read(q.str());
+		return readResponse;
 
 	// UPDATE
 	} else if (action.compare("update") == 0) {
@@ -480,6 +507,7 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 		if (fields.size() == 0) {
 			response["code"] = JsonBox::Value(406);
 			response["data"] = JsonBox::Value("missing new fields data");
+			disconnect();
 			return response;
 		}
 
@@ -497,7 +525,10 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 		// add match clause
 		q << generateWhereClause(request);
 
-		return execOnly(q.str());
+		JsonBox::Object updateResponse;
+		updateResponse = execOnly(q.str());
+		disconnect();
+		return updateResponse;
 
 	// DELETE
 	} else if (action.compare("delete") == 0) {
@@ -507,15 +538,17 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 		// add match clause
 		q << generateWhereClause(request);
 
-		return execOnly(q.str());
+		JsonBox::Object deleteResponse;
+		deleteResponse = execOnly(q.str());
+		disconnect();
+		return deleteResponse;
 
 	} else {
 		response["code"] = JsonBox::Value(406);
 		response["data"] = JsonBox::Value("invalid action");
+		disconnect();
 		return response;
 	}
-
-	disconnect();
 
 	return response;
 }
