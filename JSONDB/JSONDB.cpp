@@ -550,5 +550,5 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 		return response;
 	}
 
-	return response;
+	return -1;
 }
