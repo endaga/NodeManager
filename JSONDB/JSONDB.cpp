@@ -550,5 +550,8 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 		return response;
 	}
 
-	return -1;
+	// We should never get here.. Return something to make the linters happy.
+	response["code"] = JsonBox::Value(500);
+	response["data"] = JsonBox::Value("error");
+	return response;
 }
