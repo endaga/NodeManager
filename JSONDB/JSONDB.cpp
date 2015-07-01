@@ -241,10 +241,16 @@ JsonBox::Object JSONDB::query(JsonBox::Object request, unsigned retries)
 	}
 
 	// connect to database
-	if (!connect(dbPath)) {
-		response["code"] = JsonBox::Value(500);
-		response["data"] = JsonBox::Value("db connect failed");
-		return response;
+        int retry_count = 0;
+	while(!connect(dbPath)) {
+                usleep(100); // sleep 0.1 second
+                retry_count++;
+
+                if (retry_count > MAX_DB_CONNECT_ATTEMPTS) {
+                        response["code"] = JsonBox::Value(503);
+                        response["data"] = JsonBox::Value("db connect failed");
+                        return response;
+                }
 	}
 
 	// abstract sip_buddies and dialdata_tables into a single logical endpoint

@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+#define MAX_DB_CONNECT_ATTEMPTS 10
 
 class JSONDB {
 
